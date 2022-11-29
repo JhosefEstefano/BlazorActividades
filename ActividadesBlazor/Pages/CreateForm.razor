@@ -1,0 +1,219 @@
+﻿@page "/create/{idCliente:int}"
+@inject IActividadService ActividadService
+@inject NavigationManager NavManager
+
+<PageTitle>Crear Actividad</PageTitle>
+<NavMenu />
+
+<div class="container">
+    <div class="grid p-3">
+
+
+        <div class="card p-3">
+            <EditForm Model="@ObjCrear" OnSubmit="@Crear" class="row g-3">
+                <div class="col-md-6">
+                    <label for="cbUsuario" class="form-label">Usuario Confirma</label>
+                    <InputSelect @bind-Value="ObjCrear.idClienteUsuarioConfirma" id="cbUsuario" class="form-select">
+                        <option selected value="">Usuario...</option>
+
+                        @foreach (var u in lUsuarios)
+                        {
+                            <option value="@u.idUsuario">@u.nombre</option>
+                        }
+
+                    </InputSelect>
+                </div>
+                <div class="col-md-6">
+                    <label for="cbDepartamento" class="form-label">Departamento Admin.</label>
+                    <InputSelect @bind-Value="ObjCrear.idDepartamentoAdministrativo" id="cbDepartamento" class="form-select">
+                        <option selected value="0">Departamento...</option>
+                        @foreach (var d in lDepartamentos)
+                        {
+                            <option value="@d.idDepartamentoAdministrativo">@d.nombre</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="cbGrupo" class="form-label">Grupo Actividad</label>
+                    <InputSelect @bind-Value="pGrupoActividad" id="cbGrupo" class="form-select" onchange="@CargarTipoActividad()">
+                        @for (int i = 0; i < lGrupos.Count; i++)
+                        {
+                            if (i == 0)
+                            {
+                                <option value="0" selected>Grupo...</option>
+                            }
+                            else
+                            {
+                                <option value="@lGrupos[i].idGrupoActividad">@lGrupos[i].codigo - @lGrupos[i].nombre</option>
+                            }
+                        }
+                    </InputSelect>
+                </div>
+                <div class="col-md-6">
+                    <label for="cbTipo" class="form-label">Tipo Actividad</label>
+                    <InputSelect @bind-Value="ObjCrear.idTipoActividad" id="cbTipo" class="form-select">
+                        <option selected value="0">Tipo...</option>
+                        @for (int i = 0; i < lTipoActividad.Count; i++)
+                        {
+                            <option value="@lTipoActividad[i].idTipoActividad">@lTipoActividad[i].nombre</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="col-md-6">
+                    <label for="cbEmpresa" class="form-label">Empresa</label>
+                    <InputSelect id="cbEmpresa" @bind-Value="ObjCrear.idEmpresa" class="form-select" onchange="@CargarSucursales()">
+                        <option selected value="0"> Empresa...</option>
+
+                        @foreach (var d in lEmpresas)
+                        {
+                            <option value="@d.idEmpresa">@d.nombre</option>
+                        }
+                    </InputSelect>
+
+                </div>
+                <div class="col-md-6">
+                    <label for="cbSucursal" class="form-label">Sucursal</label>
+                    <InputSelect @bind-Value="ObjCrear.idSucursal" class="form-select">
+                        <option selected value="0"> Sucursal...</option>
+
+                        @foreach (var d in lSucursales)
+                        {
+                            <option value="@d.idSucursal">@d.nombre</option>
+                        }
+                    </InputSelect>
+                </div>
+
+                <div class="col-md-4">
+                    <label for="txtFecha" class="form-label">Fecha</label>
+                    <input @bind-value="ObjCrear.fecha" type="date" class="form-control" id="txtFecha" />
+                </div>
+                <div class="col-md-4">
+                    <label for="txtHoraInicio" class="form-label">Hora Inicio</label>
+                    <input @bind-value="ObjCrear.horaInicio" type="time" class="form-control" id="txtHoraInicio">
+                </div>
+
+                <div class="col-md-4">
+                    <label for="txtHoraFin" class="form-label">Hora Fin</label>
+                    <input @bind-value="ObjCrear.horaFin" type="time" class="form-control" id="txtHoraFin">
+                </div>
+
+                <div class="col-md-6">
+                    <label for="txtHorasCobrales" class="form-label">Horas Cobrales</label>
+                    <input @bind-value="ObjCrear.horasCobrables" type="number" class="form-control" id="txtHorasCobrales">
+                </div>
+                <div class="col-md-6">
+                    <label for="txtHorasInternas" class="form-label">Horas Internas</label>
+                    <input @bind-value="ObjCrear.horasInternas" type="number" class="form-control" id="txtHorasInternas">
+                </div>
+
+                <div class="col-md-12">
+                    <label for="txtObservacion" class="form-label">Observaci&oacute;n</label>
+                    <input @bind-value="ObjCrear.observacion" class="form-control" id="txtObservacion" style="height: 130px; resize:none"></input>
+                </div>
+
+                <div class="col-12">
+                    <button type="submit" disabled="@(!context.Validate())" class="btn btn-primary">Crear</button>
+                </div>
+            </EditForm>
+
+        </div>
+    </div>
+</div>
+
+@code {
+
+    [Parameter] public int idCliente { get; set; }
+    public ActividadPostViewModel ObjCrear { get; set; } = new ActividadPostViewModel();
+    public string html { get; set; } = "<!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\r\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\r\n    <title>Email Soporte</title>\r\n</head>\r\n<body>\r\n<table border=\"0\" cellspacing=\"0\" width=\"100%\">\r\n\t<tr>\r\n\t\t<td></td>\r\n\t\t<td width=\"700\">\r\n\t\t\t<table style=\"padding: 5px; margin:0 auto; border-collapse: collapse;\">\r\n\t\t\t\t<tr>\r\n\t\t\t\t\t<td style=\"padding: 0\" >\r\n\t\t\t\t\t<a href=\"{urlRedirect}\">\t<img style=\"padding: 0; display: block;width:100%;\" src=\"{urlImagen}\" width=\"700\"></a>\r\n\t\t\t\t\t</td>\r\n\t\t\t\t</tr>\r\n\t\t\t\t\r\n\t\t\t\t<tr>\r\n\t\t\t\t\t<td style=\"background-color: #ffffff\">\r\n\t\t\t\t\t\t<div style=\"color: #34495e; margin: 1% 5% 2%; text-align: justify;font-family: sans-serif\">\r\n\t\t\t\t\t\t\t<h2 style=\"color: #04192e; margin: 0 0 7px\">Hola {usuarioConfirma}!!!</h2>\r\n\t\t\t\t\t\t\t<p style=\"margin: 2px; font-size: 15px\">\r\n                                La presente es una notificación creada por nuestro sistema de soporte, \r\n                                dicha notificación es referente al actividad No. <b>{noActividad}</b> de tipo <b> {tipoActividad} </b>\r\n                                de la empresa <b>  {empresa} </b> de la sucursal <b>{sucursal}</b>\r\n                                la cual se encuentra en estado pendiente de confirmación.</p>\r\n\r\n\t\t\t\t\t\t\t<p>Por lo que solicitamos por favor verificar el detalle \r\n                                para darla por aceptada.</p>\r\n\t\t\r\n\t\t\t\t\t\t\t<div style=\"width: 100%; margin:40px 0px 0px 0px; text-align: center\">\r\n\t\t\t\t\t\t\t\t<a style=\"text-decoration: none; border-radius: 5px; padding: 11px 23px; color: white; background-color: #B91B21\" href=\'http://44.241.185.89/ValidacionActividad/home/{llave}\'>Ver detalles</a>\t\r\n\t\t\t\t\t\t\t</div>\r\n\t\t\t\t\t\t\t<p style=\"color: #b3b3b3; font-size: 12px; text-align: center;margin: 30px 0 0\">Site Soporte | 2022</p>\r\n\t\t\t\t\t\t</div>\r\n\t\t\t\t\t</td>\r\n\t\t\t\t</tr>\r\n\t\t\t</table>\r\n\t\t</td>\r\n\t\t<td></td>\r\n\t\t</tr>\r\n</table>\r\n</body>\r\n</html>";
+
+    List<UsuarioModel> lUsuarios = new List<UsuarioModel>();
+    List<DepartamentoModel> lDepartamentos = new List<DepartamentoModel>();
+    List<GrupoActividadModel> lGrupos = new List<GrupoActividadModel>();
+    List<EmpresaModel> lEmpresas = new List<EmpresaModel>();
+    List<TipoActividadModel> lTipoActividad = new List<TipoActividadModel>();
+    List<SucursalModel> lSucursales = new List<SucursalModel>();
+
+    private ActividadResponseModel ObjRepo = new ActividadResponseModel();
+
+    private DateTime today = new DateTime();
+    private int pGrupoActividad = 0;
+    private bool Exito = false;
+    protected async override Task OnInitializedAsync()
+    {
+        await this.CargarUsuarios();
+        await this.CargarDepartamentos();
+        await this.CargarGrupos();
+        await this.CargarEmpresas();
+    }
+
+    private async Task CargarUsuarios()
+    {
+        lUsuarios = await ActividadService.GetUsuarios(idCliente);
+    }
+
+    private async Task CargarDepartamentos()
+    {
+        lDepartamentos = await ActividadService.GetDeparamentos();
+    }
+
+    private async Task CargarGrupos()
+    {
+        lGrupos = await ActividadService.GruposActividad();
+    }
+
+    private async Task CargarEmpresas()
+    {
+        lEmpresas = await ActividadService.GetEmpresas(idCliente);
+    }
+
+    private async Task TipoActividades(int pIdGrupo)
+    {
+        lTipoActividad = await ActividadService.GetTiposActividad(pIdGrupo);
+    }
+
+    private async Task CargarTipoActividad()
+    {
+        await this.TipoActividades(pGrupoActividad);
+    }
+
+    private async Task CargarSucursales()
+    {
+        lSucursales = await ActividadService.GetSucursales(ObjCrear.idEmpresa);
+    }
+
+    private async void Crear()
+    {
+
+        Console.WriteLine("Estoy creando");
+
+        ActividadPostModel Obj = new ActividadPostModel()
+            {
+                idCliente = idCliente,
+                idClienteUsuarioConfirma = ObjCrear.idClienteUsuarioConfirma,
+                idDepartamentoAdministrativo = ObjCrear.idDepartamentoAdministrativo,
+                idTipoActividad = ObjCrear.idTipoActividad,
+                idEmpresa = ObjCrear.idEmpresa,
+                idSucursal = ObjCrear.idSucursal,
+                fecha = ObjCrear.fecha,
+                horaInicio = { horas = ObjCrear.horaInicio.Hour, minutos = ObjCrear.horaInicio.Minute },
+                horaFin = { horas = ObjCrear.horaFin.Hour, minutos = ObjCrear.horaFin.Minute },
+                horasCobrables = ObjCrear.horasCobrables,
+                horasInternas = ObjCrear.horasInternas,
+                observacion = ObjCrear.observacion,
+                html = html
+            };
+
+
+        ActividadResponseModel response = new ActividadResponseModel();
+
+        ObjRepo = await ActividadService.PostCrearActividad(Obj);
+
+        Exito = true;
+
+        NavManager.NavigateTo($"/exito/{ObjRepo.mailDestinatario}");
+
+    }
+
+}

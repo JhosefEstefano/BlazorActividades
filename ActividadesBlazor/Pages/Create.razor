@@ -1,0 +1,146 @@
+﻿@page "/create"
+@inject HttpClient Http
+@inject IClasificacionService ClasificacionService
+
+<PageTitle>Crear Actividad</PageTitle>
+<NavMenu />
+
+<div class="container">
+    <div class="grid p-3">
+
+        <div class="alert alert-danger alert-dismissible fade @ClassError" role="alert">
+            <strong>Error:</strong> @Error
+            <button @onclick="@CloseError" type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="accordion accordion-flush" id="accordionFlushExample">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header bg-primary" id="flush-headingOne">
+                            <button @onclick="@ToggleAccordion" class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne" aria-expanded="@collapseAccordion" aria-controls="flush-collapseOne">
+                                Buscador Clientes
+                            </button>
+                        </h2>
+                        <div id="flush-collapseOne" class="accordion-collapse collapse @AccordionCssClass" aria-labelledby="flush-headingOne" data-bs-parent="#accordionFlushExample" style="">
+
+                            <EditForm Model="obj" OnSubmit="Filtrar" class="row g-3 p-md-3 p-3 align-items-end">
+
+                                <div class="col-md-6 col-sm-12">
+                                    <label for="cbClasificacion" class="form-label">Clasificaci&oacute;n Cliente</label>
+
+                                    <InputSelect @bind-Value="@obj.idClasificacion" class="form-select" id="cbClasificacion" required>
+                                        @if (Clasificaciones == null)
+                                        {
+                                            <option selected value="0">Cargando...</option>
+                                        }
+                                        else
+                                        {
+                                            <option selected disabled value="0">Clasificaci&oacute;n...</option>
+
+                                            @foreach (var c in Clasificaciones)
+                                            {
+                                                <option value="@c.idClasificacionCliente">@c.nombre</option>
+                                            }
+                                        }
+                                    </InputSelect>
+                                </div>
+                                <div class="col-md-6 col-sm-12">
+                                    <label for="txtNombre" class="form-label">Nombre</label>
+                                    <InputText @bind-Value="@obj.nombre" class="form-control" id="txtNombre">
+
+                                    </InputText>
+                                </div>
+
+
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="submit" class="btn btn-dark bg-primary "><i class="fa-solid fa-magnifying-glass"></i> Buscar </button>
+                                </div>
+
+                            </EditForm>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row  row-cols-sm-2 row-cols-md-4 mt-2 text-center">
+
+                @foreach (var c in Clientes)
+                {
+                    <div class="col p-2">
+                    <NavLink style="text-decoration: none;" class="card shadow mt-2" href="@string.Concat("create/",@c.idCliente)">
+                        <img src="@string.Concat("https://soporteadmin.siteca.app/Content/anexos/LogoCliente_",@c.idCliente,".jpg")" class="card-img-top" alt="logo @c.nombre">
+                        <div class="card-body">
+                            <h5 class="card-title">@c.nombre - @c.codigo</h5>
+                        </div>
+                    </NavLink>
+                    </div>
+                }
+           
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private ClasificacionFiltroModel obj = new ClasificacionFiltroModel();
+
+    private bool collapseAccordion = true;
+
+    private bool showError = false;
+
+    private string? ClassError => showError ? "show" : "close";
+
+    private string? AccordionCssClass => collapseAccordion ? "show" : null;
+
+    private void ToggleAccordion()
+    {
+        collapseAccordion = !collapseAccordion;
+    }
+
+    private void CloseError()
+    {
+        showError = !showError;
+    }
+
+    public List<ClasificacionClienteModel> Clasificaciones { get; set; } = new List<ClasificacionClienteModel>();
+
+    public string? Error { get; set; }
+
+    private List<ClientesModel> Clientes { get; set; } = new List<ClientesModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            Clasificaciones = await ClasificacionService.GetClasificacion();
+        }
+        catch (Exception ex)
+        {
+            showError = true;
+            Error = ex.Message;
+        }
+    }
+
+
+    private async void Filtrar()
+    {
+        try
+        {
+            Clientes = new List<ClientesModel>();
+            Http.DefaultRequestHeaders.Authorization =  new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJqaG9zZWYucmV5ZXNAc2l0ZWNhLm5ldCIsImp0aSI6ImE5NmIyZjI2LWJjM2YtNDJjYy1iMDhlLTJiNWI5Yjc2YWI1MyIsIlVzdWFyaW8iOiJqaG9zZWYucmV5ZXNAc2l0ZWNhLm5ldCIsImV4cCI6MTY2OTY5Mjk3M30.Lnjl1L1k6u1rSj_TPJAOmI6NunFFyFA6s4-IwDgBaJA");
+            var response = await Http.PostAsJsonAsync<ClasificacionFiltroModel>("Cliente/Consulta", obj);
+            response.EnsureSuccessStatusCode();
+            using var stream = response.Content.ReadAsStream();
+            Clientes = JsonSerializer.Deserialize<List<ClientesModel>>(stream);
+        }
+        catch (Exception ex)
+        {
+
+            showError = true;
+            Error = ex.Message;
+        }
+    }
+
+}

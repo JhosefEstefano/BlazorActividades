@@ -1,0 +1,22 @@
+﻿@*<div class="card">
+    
+</div>
+*@
+
+<NavLink style="text-decoration: none;" class="card shadow mt-2" href="@string.Concat("create/",@idCliente)">
+   <img src="@string.Concat(urlImg,idCliente,formato)" class="card-img-top" alt="logo @nombre">
+    <div class="card-body">
+        <h5 class="card-title">@nombre - @codigo</h5>
+    </div>
+</NavLink>
+
+@code {
+    [Parameter]
+    public int? idCliente { get; set; } 
+    [Parameter]
+    public string? codigo { get; set; }
+    [Parameter]
+    public string? nombre { get; set; }
+    private string formato { get; set; } = ".jpg";
+    private string urlImg { get; set; } = "https://soporteadmin.siteca.app/Content/anexos/LogoCliente_";
+}

@@ -1,0 +1,15 @@
+﻿<NavLink style="text-decoration: none;" class="card text-primary shadow mt-2" href="@Redirect">
+    <div class="card-body text-center">
+        <h5 class="card-title">@Title</h5>
+        <i class="@Icon"></i>
+    </div>
+</NavLink>
+
+@code {
+    [Parameter]
+    public string? Title { get; set; }
+    [Parameter]
+    public string? Icon { get; set; }
+    [Parameter]
+    public string? Redirect { get; set; }
+}

@@ -1,0 +1,18 @@
+﻿@page "/exito/{correo}"
+
+
+ <div class="container">
+    <div class="alert alert-success" role="alert">
+
+        <p>Se creo la actividad correctamente y se envio un correo al siguiente destinatario.</p>
+        <ul class="list-group">
+            <li class="list-group-item">@correo</li>
+        </ul>
+    </div>
+    <NavLink href="/">Ir Al inicio</NavLink>
+ </div>
+
+@code {
+    [Parameter]
+    public string correo { get; set; }
+}
